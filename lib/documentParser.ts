@@ -375,7 +375,7 @@ export function extractSkills(text: string): string[] {
     }
   });
 
-  return [...new Set(foundSkills)]; // Remove duplicates
+  return Array.from(new Set(foundSkills)); // Remove duplicates
 }
 
 // Analyze keyword density and missing keywords

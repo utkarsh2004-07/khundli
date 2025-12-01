@@ -48,7 +48,7 @@ export default function BattlePage() {
     setError('')
 
     try {
-      const result = await premium.battleDestiny(friendData)
+      const result = await premium.battle(friendData)
       setBattleResult(result)
     } catch (err: any) {
       setError(err.message || 'Battle analysis failed')

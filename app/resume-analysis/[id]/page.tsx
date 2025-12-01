@@ -26,31 +26,31 @@ export default function ResumeAnalysisPage() {
 
             // Handle legacy raw data format if necessary
             // If data has snake_case keys (like ats_score) but missing camelCase keys (like atsScore)
-            if (data.ats_score !== undefined && data.atsScore === undefined) {
+            if ((data as any).ats_score !== undefined && (data as any).atsScore === undefined) {
                 // Transform raw data to UI format
                 setResult({
-                    overallScore: data.ats_score,
-                    atsScore: data.ats_score,
-                    atsBreakdown: data.ats_breakdown,
+                    overallScore: (data as any).ats_score,
+                    atsScore: (data as any).ats_score,
+                    atsBreakdown: (data as any).ats_breakdown,
                     jobMatch: {
-                        compatibility: data.job_match_percentage,
-                        details: data.job_match_details
+                        compatibility: (data as any).job_match_percentage,
+                        details: (data as any).job_match_details
                     },
                     keywordAnalysis: {
-                        present: data.keyword_analysis?.present_keywords || [],
-                        missing: data.keyword_analysis?.missing_critical || [],
-                        highPriority: data.keyword_analysis?.high_priority_missing || [],
-                        density: data.keyword_analysis?.keyword_density
+                        present: (data as any).keyword_analysis?.present_keywords || [],
+                        missing: (data as any).keyword_analysis?.missing_critical || [],
+                        highPriority: (data as any).keyword_analysis?.high_priority_missing || [],
+                        density: (data as any).keyword_analysis?.keyword_density
                     },
-                    candidateInfo: data.candidate_info,
-                    companySkillGaps: data.company_skill_gaps,
-                    learningRoadmap: data.learning_roadmap,
-                    sections: data.section_analysis,
-                    missingSkills: data.missing_skills || data.company_skill_gaps,
-                    optimizedResume: data.optimized_resume,
-                    interviewPrep: data.interview_preparation,
-                    extraInsights: data.extra_insights,
-                    personalInfo: data.candidate_info // Fallback as raw data doesn't have personalInfo
+                    candidateInfo: (data as any).candidate_info,
+                    companySkillGaps: (data as any).company_skill_gaps,
+                    learningRoadmap: (data as any).learning_roadmap,
+                    sections: (data as any).section_analysis,
+                    missingSkills: (data as any).missing_skills || (data as any).company_skill_gaps,
+                    optimizedResume: (data as any).optimized_resume,
+                    interviewPrep: (data as any).interview_preparation,
+                    extraInsights: (data as any).extra_insights,
+                    personalInfo: (data as any).candidate_info // Fallback as raw data doesn't have personalInfo
                 })
             } else {
                 setResult(data)
