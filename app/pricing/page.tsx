@@ -38,9 +38,12 @@ export default function PricingPage() {
         {/* Header */}
         <div className="mb-16">
           <Gift className="h-20 w-20 text-yellow-400 mx-auto mb-6 animate-bounce" />
-          <h1 className="text-5xl md:text-6xl font-bold mb-6 bg-gradient-to-r from-yellow-400 to-orange-400 bg-clip-text text-transparent">
-            🎉 Everything is FREE! 🎉
+          <h1 className="text-4xl md:text-5xl font-bold mb-6 bg-gradient-to-r from-yellow-400 to-orange-400 bg-clip-text text-transparent">
+            Affordable Pricing for Career & Resume Tools
           </h1>
+          <h2 className="text-3xl md:text-4xl font-bold mb-4 text-yellow-400">
+            🎉 Everything is FREE! 🎉
+          </h2>
           <p className="text-2xl text-gray-300 mb-8">
             All premium features are completely free for a limited time!
           </p>

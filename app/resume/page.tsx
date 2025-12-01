@@ -395,7 +395,7 @@ CERTIFICATIONS
         <div className="text-center mb-8">
           <div className="text-6xl mb-4 drop-shadow-[0_0_20px_rgba(168,85,247,0.8)]">ॐ</div>
           <h1 className="text-4xl font-bold mb-2 text-purple-300 font-serif" style={{ textShadow: '0 0 30px rgba(168,85,247,0.5)' }}>
-            Career Kundali Analyzer
+            AI Resume Analysis & ATS Score Checker
           </h1>
           <p className="text-pink-300 text-lg font-serif">Discover Your Professional Destiny Through Ancient Wisdom</p>
         </div>

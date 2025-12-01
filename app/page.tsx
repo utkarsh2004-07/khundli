@@ -9,9 +9,9 @@ export default function HomePage() {
         <div className="max-w-4xl mx-auto text-center">
           <div className="mb-8">
             <Sparkles className="h-16 w-16 text-purple-400 mx-auto mb-4" />
-            <h1 className="text-5xl md:text-7xl font-bold mb-6">
+            <h1 className="text-4xl md:text-6xl font-bold mb-6">
               <span className="bg-gradient-to-r from-purple-400 via-pink-400 to-blue-400 bg-clip-text text-transparent">
-                Tech Kundali
+                AI Resume Analysis, ATS Score & Career Prediction Tool
               </span>
             </h1>
             <p className="text-xl md:text-2xl text-purple-200 mb-8">

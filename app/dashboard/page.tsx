@@ -140,8 +140,11 @@ export default function DashboardPage() {
         {/* Header */}
         <div className="mb-8">
           <h1 className="text-3xl font-bold mb-2">
-            Welcome back, {user?.fullName}
+            Your Resume Analysis Dashboard & History
           </h1>
+          <p className="text-lg text-purple-300 mb-2">
+            Welcome back, {user?.fullName}
+          </p>
           <p className="text-gray-300">
             Your tech destiny awaits. Explore your cosmic coding journey.
           </p>
