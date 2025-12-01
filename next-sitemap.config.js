@@ -1,6 +1,6 @@
 /** @type {import('next-sitemap').IConfig} */
 module.exports = {
-  siteUrl: 'https://techkundali.pro',
+siteUrl: 'https://techkundli.pro',
   generateRobotsTxt: true,
   sitemapSize: 5000,
   changefreq: 'daily',
