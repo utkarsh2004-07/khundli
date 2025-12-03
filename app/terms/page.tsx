@@ -16,7 +16,7 @@ export default function TermsPage() {
 
                 <div className="prose prose-invert prose-purple max-w-none space-y-6 text-purple-100/90">
                     <p>
-                        For the purpose of these Terms and Conditions, The term "we", "us", "our" used anywhere on this page shall mean UTKARSH SINGH, whose registered/operational office is B/107 Sidddheshwar apt.opp.nadhbrahma soc.,achole road,alkapuri,capital mall vasai nalasopara east palghar, maharashtra Thane MAHARASHTRA 401209 . "you", "your", "user", "visitor" shall mean any natural or legal person who is visiting our website and/or agreed to purchase from us.
+                        For the purpose of these Terms and Conditions, The term "we", "us", "our" used anywhere on this page shall mean UTKARSH SINGH, contact us on us59908@gmail.com . "you", "your", "user", "visitor" shall mean any natural or legal person who is visiting our website and/or agreed to purchase from us.
                     </p>
 
                     <p>Your use of the website and/or purchase from us are governed by following Terms and Conditions:</p>
