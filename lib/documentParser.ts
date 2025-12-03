@@ -1,7 +1,7 @@
 // PDF and document parsing utilities
 export async function extractTextFromFile(file: File): Promise<string> {
   const fileType = file.type;
-  
+
   if (fileType === 'application/pdf') {
     return extractTextFromPDF(file);
   } else if (fileType === 'application/vnd.openxmlformats-officedocument.wordprocessingml.document') {
@@ -44,7 +44,7 @@ async function extractTextFromDocx(file: File): Promise<string> {
 export function extractStructuredInfo(text: string) {
   const lines = text.split('\n').filter(line => line.trim());
   const lowerText = text.toLowerCase();
-  
+
   const result = {
     profile: {
       profileName: '',
@@ -73,7 +73,7 @@ export function extractStructuredInfo(text: string) {
     /\b\d{10}\b/,
     /\(?\d{3}\)?[-.\s]?\d{3}[-.\s]?\d{4}/
   ];
-  
+
   for (const pattern of phonePatterns) {
     const match = text.match(pattern);
     if (match) {
@@ -86,11 +86,11 @@ export function extractStructuredInfo(text: string) {
   for (const line of lines.slice(0, 5)) {
     const trimmed = line.trim();
     const words = trimmed.split(' ');
-    if (words.length >= 2 && words.length <= 4 && 
-        /^[a-zA-Z\s.]+$/.test(trimmed) && 
-        !trimmed.includes('@') && 
-        !trimmed.includes('http') &&
-        trimmed.length > 5) {
+    if (words.length >= 2 && words.length <= 4 &&
+      /^[a-zA-Z\s.]+$/.test(trimmed) &&
+      !trimmed.includes('@') &&
+      !trimmed.includes('http') &&
+      trimmed.length > 5) {
       result.profile.fullName = trimmed;
       result.profile.profileName = trimmed;
       break;
@@ -102,7 +102,7 @@ export function extractStructuredInfo(text: string) {
     /(?:SUMMARY|PROFILE|OBJECTIVE|ABOUT ME|CAREER OBJECTIVE)[:\s]*([\s\S]*?)(?=\n\s*(?:EXPERIENCE|EDUCATION|SKILLS|PROJECTS|WORK|EMPLOYMENT|$))/i,
     /(?:^|\n)\s*([A-Z][^\n]{80,400}[.!])(?=\n)/m
   ];
-  
+
   for (const pattern of summaryPatterns) {
     const match = text.match(pattern);
     if (match && match[1]) {
@@ -112,12 +112,12 @@ export function extractStructuredInfo(text: string) {
   }
 
   // 2. Determine Experience Level
-  if (lowerText.includes('fresher') || lowerText.includes('recent graduate') || 
-      lowerText.includes('entry level') || lowerText.includes('new graduate')) {
+  if (lowerText.includes('fresher') || lowerText.includes('recent graduate') ||
+    lowerText.includes('entry level') || lowerText.includes('new graduate')) {
     result.experienceLevel = 'Fresher';
-  } else if (lowerText.includes('senior') || lowerText.includes('lead') || 
-             lowerText.includes('manager') || lowerText.includes('architect') ||
-             lowerText.includes('principal') || lowerText.includes('director')) {
+  } else if (lowerText.includes('senior') || lowerText.includes('lead') ||
+    lowerText.includes('manager') || lowerText.includes('architect') ||
+    lowerText.includes('principal') || lowerText.includes('director')) {
     result.experienceLevel = 'Experienced';
   } else {
     result.experienceLevel = 'Professional';
@@ -141,7 +141,7 @@ export function extractStructuredInfo(text: string) {
     'Webpack', 'Vite', 'Babel', 'ESLint', 'Prettier',
     'Machine Learning', 'AI', 'Data Science', 'TensorFlow', 'PyTorch'
   ];
-  
+
   // Extract skills from dedicated skills section first
   const skillsSection = text.match(/(?:SKILLS|TECHNICAL SKILLS|TECHNOLOGIES)[:\s]*([\s\S]*?)(?=\n\s*(?:EXPERIENCE|EDUCATION|PROJECTS|WORK|$))/i);
   if (skillsSection) {
@@ -152,7 +152,7 @@ export function extractStructuredInfo(text: string) {
       }
     });
   }
-  
+
   // Also check entire document for skills
   skillKeywords.forEach(skill => {
     if (lowerText.includes(skill.toLowerCase()) && !result.skills.includes(skill)) {
@@ -165,25 +165,25 @@ export function extractStructuredInfo(text: string) {
   if (experienceSection) {
     const expText = experienceSection[1];
     const expLines = expText.split('\n').filter(line => line.trim());
-    
+
     let currentExp: any = null;
-    
+
     for (let i = 0; i < expLines.length; i++) {
       const line = expLines[i].trim();
-      
+
       // Look for date patterns (start of new experience)
       const dateMatch = line.match(/(\d{1,2}\/\d{4}|\d{4}|\w+\s+\d{4})\s*[-–—]\s*(\d{1,2}\/\d{4}|\d{4}|\w+\s+\d{4}|present|current)/i);
-      
+
       if (dateMatch) {
         // Save previous experience if exists
         if (currentExp) {
           result.workExperience.push(currentExp);
         }
-        
+
         // Find company and role from previous lines
         let company = '';
         let role = '';
-        
+
         for (let j = Math.max(0, i - 3); j < i; j++) {
           const prevLine = expLines[j]?.trim();
           if (prevLine && !prevLine.match(/\d{4}/) && prevLine.length > 2) {
@@ -191,7 +191,7 @@ export function extractStructuredInfo(text: string) {
             else if (!role && prevLine !== company) role = prevLine;
           }
         }
-        
+
         currentExp = {
           company: company || 'Company Name',
           role: role || 'Position Title',
@@ -207,7 +207,7 @@ export function extractStructuredInfo(text: string) {
         currentExp.keyAchievements.push(line);
       }
     }
-    
+
     // Add the last experience
     if (currentExp) {
       result.workExperience.push(currentExp);
@@ -219,26 +219,26 @@ export function extractStructuredInfo(text: string) {
   if (educationSection) {
     const eduText = educationSection[1];
     const eduLines = eduText.split('\n').filter(line => line.trim());
-    
+
     let currentEdu: any = null;
-    
+
     for (const line of eduLines) {
       const trimmed = line.trim();
-      
+
       // Look for degree patterns
       const degreeMatch = trimmed.match(/(bachelor|master|phd|doctorate|diploma|certificate|b\.?tech|m\.?tech|b\.?sc|m\.?sc|mba|bba|b\.?e|m\.?e|b\.?com|m\.?com)/i);
-      
+
       if (degreeMatch) {
         if (currentEdu) {
           result.education.push(currentEdu);
         }
-        
+
         currentEdu = {
           institution: '',
           degree: trimmed,
           graduationDate: ''
         };
-        
+
         // Look for year in the same line or nearby
         const yearMatch = trimmed.match(/(20\d{2}|19\d{2})/);
         if (yearMatch) {
@@ -253,7 +253,7 @@ export function extractStructuredInfo(text: string) {
         }
       }
     }
-    
+
     if (currentEdu) {
       result.education.push(currentEdu);
     }
@@ -264,23 +264,23 @@ export function extractStructuredInfo(text: string) {
   if (projectSection) {
     const projText = projectSection[1];
     const projLines = projText.split('\n').filter(line => line.trim());
-    
+
     let currentProject: any = null;
-    
+
     for (const line of projLines) {
       const trimmed = line.trim();
-      
+
       // Project name (usually a standalone line or starts with bullet)
-      if (trimmed && !trimmed.startsWith('•') && !trimmed.startsWith('-') && 
-          !trimmed.startsWith('*') && !trimmed.toLowerCase().includes('technologies') &&
-          trimmed.length > 3 && trimmed.length < 100) {
-        
+      if (trimmed && !trimmed.startsWith('•') && !trimmed.startsWith('-') &&
+        !trimmed.startsWith('*') && !trimmed.toLowerCase().includes('technologies') &&
+        trimmed.length > 3 && trimmed.length < 100) {
+
         if (currentProject) {
           result.projects.push(currentProject);
         }
-        
+
         const urlMatch = trimmed.match(/(https?:\/\/[^\s]+)/);
-        
+
         currentProject = {
           projectName: trimmed.replace(/(https?:\/\/[^\s]+)/g, '').trim(),
           link: urlMatch?.[0] || '',
@@ -302,7 +302,7 @@ export function extractStructuredInfo(text: string) {
         currentProject.technologies.push(...techs);
       }
     }
-    
+
     if (currentProject) {
       result.projects.push(currentProject);
     }
@@ -319,13 +319,13 @@ export function extractStructuredInfo(text: string) {
 // Keep original function for backward compatibility
 export function extractPersonalInfo(text: string) {
   const structured = extractStructuredInfo(text);
-  
+
   // Extract additional info not in main structure
   const linkedinMatch = text.match(/linkedin\.com\/in\/[\w-]+/i);
   const githubMatch = text.match(/github\.com\/[\w-]+/i);
-  const locationMatch = text.match(/(?:Address|Location)[:\s]*([^\n]+)/i) || 
-                       text.match(/\b([A-Z][a-z]+,\s*[A-Z]{2}|[A-Z][a-z]+\s*\d{5})\b/);
-  
+  const locationMatch = text.match(/(?:Address|Location)[:\s]*([^\n]+)/i) ||
+    text.match(/\b([A-Z][a-z]+,\s*[A-Z]{2}|[A-Z][a-z]+\s*\d{5})\b/);
+
   return {
     name: structured.profile.fullName,
     email: structured.profile.email,
@@ -382,7 +382,7 @@ export function extractSkills(text: string): string[] {
 export function analyzeKeywords(resumeText: string, jobDescription: string = '') {
   const resumeWords = resumeText.toLowerCase().split(/\s+/);
   const jobWords = jobDescription.toLowerCase().split(/\s+/);
-  
+
   const techKeywords = [
     'javascript', 'typescript', 'react', 'node.js', 'python', 'java', 'docker',
     'kubernetes', 'aws', 'azure', 'mongodb', 'postgresql', 'redis', 'graphql',
@@ -390,22 +390,22 @@ export function analyzeKeywords(resumeText: string, jobDescription: string = '')
     'git', 'linux', 'html', 'css', 'angular', 'vue', 'express', 'next.js'
   ];
 
-  const presentKeywords = techKeywords.filter(keyword => 
+  const presentKeywords = techKeywords.filter(keyword =>
     resumeWords.some(word => word.includes(keyword.replace('.', '')))
   );
 
-  const jobKeywords = jobDescription ? 
-    techKeywords.filter(keyword => 
+  const jobKeywords = jobDescription ?
+    techKeywords.filter(keyword =>
       jobWords.some(word => word.includes(keyword.replace('.', '')))
     ) : [];
 
-  const missingKeywords = jobKeywords.filter(keyword => 
+  const missingKeywords = jobKeywords.filter(keyword =>
     !presentKeywords.includes(keyword)
   );
 
   return {
     present: presentKeywords,
-    missing: missingKeywords.length > 0 ? missingKeywords : 
+    missing: missingKeywords.length > 0 ? missingKeywords :
       techKeywords.filter(k => !presentKeywords.includes(k)).slice(0, 5),
     suggestions: [
       'Add cloud technologies (AWS, Azure, Docker)',

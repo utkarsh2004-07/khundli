@@ -450,9 +450,9 @@ function extractDataManually(text: string, resumeText: string, jobDescription: s
 
   // Extract all data manually
   // console.log('👤 Extracting candidate info...')
-  const name = getValue(/"name":\s*"([^"]+)"/) 
+  const name = getValue(/"name":\s*"([^"]+)"/)
   const email = getValue(/"email":\s*"([^"]+)"/)
-  const phone = getValue(/"phone":\s*"([^"]+)"/) 
+  const phone = getValue(/"phone":\s*"([^"]+)"/)
   const currentRole = getValue(/"current_role":\s*"([^"]+)"/) || 'Web Developer'
   const experienceYears = getValue(/"experience_years":\s*"([^"]+)"/) || '0.5 years'
 

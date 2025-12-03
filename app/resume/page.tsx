@@ -340,7 +340,7 @@ CERTIFICATIONS
           <div className="bg-gradient-to-r from-yellow-600/20 to-orange-600/20 border-2 border-yellow-500/50 rounded-xl p-8 mb-8 text-center">
             <h2 className="text-2xl font-bold text-yellow-400 mb-4">🔍 Want to See Full Analysis Details?</h2>
             <p className="text-lg text-gray-300 mb-6">
-              This is just a summary! For complete resume analysis including detailed skill gaps, learning roadmap, 
+              This is just a summary! For complete resume analysis including detailed skill gaps, learning roadmap,
               interview preparation, and section-by-section breakdown, visit your dashboard.
             </p>
             <div className="flex flex-col sm:flex-row gap-4 justify-center">

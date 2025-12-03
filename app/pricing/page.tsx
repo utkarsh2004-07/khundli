@@ -67,7 +67,7 @@ export default function PricingPage() {
 
       // Configure Razorpay options
       const options = {
-        key: 'rzp_test_RmiEgx4rUdrcQO', // Your test key
+        key: 'rzp_live_RnAOJihRlLi0dm', // Your live key
         amount: orderData.amount,
         currency: orderData.currency,
         name: 'Tech Kundali',
@@ -147,16 +147,16 @@ export default function PricingPage() {
     },
     {
       id: 'basic',
-      name: 'Basic Pro',
+      name: 'Interview Hub Pro',
       price: 69,
-      period: '', // One-time / Credit pack
+      period: '',
       icon: Zap,
       color: 'blue',
       popular: true,
       features: [
         '10 Resume Analyses',
         '10 Tech Predictions',
-        '20 Interview Questions',
+        '20 Interview Questions Unlock',
         'Advanced Career Insights',
         'Resume Gap Analysis',
         'Learning Roadmap'
@@ -165,15 +165,15 @@ export default function PricingPage() {
     },
     {
       id: 'premium',
-      name: 'Premium Unlimited',
+      name: 'Premium Pack',
       price: 99,
-      period: '/month',
+      period: '',
       icon: Crown,
       color: 'yellow',
       features: [
-        'Unlimited Resume Analyses',
-        'Unlimited Tech Predictions',
-        'Unlimited Interview Questions',
+        '50 Resume Analyses',
+        '50 Tech Predictions',
+        'All Interview Questions Unlocked',
         'Full Tech Kundali',
         'Company Compatibility',
         'Battle Destiny Mode',
@@ -231,7 +231,7 @@ export default function PricingPage() {
                   <h2 className="text-2xl font-bold text-white mb-2">{plan.name}</h2>
                   <div className="flex items-baseline justify-center gap-2">
                     <span className="text-5xl font-bold text-white">₹{plan.price}</span>
-                    {plan.price > 0 && <span className="text-gray-400">/year</span>}
+                    {plan.price > 0 && <span className="text-gray-400">credits</span>}
                   </div>
                 </div>
 

@@ -23,7 +23,7 @@ export default function PaymentSuccessPage() {
     const planDetails = {
         basic: {
             name: 'Basic Pro',
-            price: '₹69',
+            price: '₹1',
             features: [
                 '10 Resume Analyses',
                 '10 Tech Predictions',
@@ -32,7 +32,7 @@ export default function PaymentSuccessPage() {
         },
         premium: {
             name: 'Premium Unlimited',
-            price: '₹99',
+            price: '₹1',
             features: [
                 'Unlimited Resume Analyses',
                 'Unlimited Predictions',
