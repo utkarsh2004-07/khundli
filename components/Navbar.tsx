@@ -79,6 +79,9 @@ export default function Navbar() {
                 <Link href="/pricing" className="text-purple-300 hover:text-white transition-colors">
                   Pricing
                 </Link>
+                <Link href="/profile" className="text-purple-300 hover:text-white transition-colors">
+                  Profile
+                </Link>
                 <div className="flex items-center space-x-3 pl-4 border-l border-purple-500/30">
                   <div className="flex items-center space-x-2">
                     <User className="h-5 w-5 text-purple-400" />
@@ -155,6 +158,9 @@ export default function Navbar() {
                   </Link>
                   <Link href="/pricing" onClick={closeMobileMenu} className="block px-3 py-2 text-purple-300 hover:text-white hover:bg-purple-500/10 rounded-md transition-colors">
                     Pricing
+                  </Link>
+                  <Link href="/profile" onClick={closeMobileMenu} className="block px-3 py-2 text-purple-300 hover:text-white hover:bg-purple-500/10 rounded-md transition-colors">
+                    Profile
                   </Link>
                   <button
                     onClick={() => { handleLogout(); closeMobileMenu(); }}

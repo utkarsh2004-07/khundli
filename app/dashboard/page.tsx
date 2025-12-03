@@ -3,7 +3,142 @@
 import { useState, useEffect } from 'react'
 import Link from 'next/link'
 import { auth, predictions } from '@/lib/api'
-import { Sparkles, Zap, Star, Crown, Calendar, TrendingUp } from 'lucide-react'
+import { Sparkles, Zap, Star, Crown, Calendar, TrendingUp, AlertCircle, FileText, Brain, MessageSquare } from 'lucide-react'
+
+function UsageStatsSection() {
+  const [usage, setUsage] = useState<any>(null)
+  const [loading, setLoading] = useState(true)
+
+  useEffect(() => {
+    loadUsageStats()
+  }, [])
+
+  const loadUsageStats = async () => {
+    try {
+      const token = localStorage.getItem('tk_token')
+      if (!token) return
+
+      const response = await fetch(`${process.env.NEXT_PUBLIC_API_BASE || 'http://localhost:8787'}/api/usage`, {
+        headers: { Authorization: `Bearer ${token}` }
+      })
+      const data = await response.json()
+      setUsage(data)
+    } catch (error) {
+      console.error('Failed to load usage stats:', error)
+    } finally {
+      setLoading(false)
+    }
+  }
+
+  if (loading || !usage) return null
+
+  const getProgressColor = (used: number, limit: number | string) => {
+    if (limit === Infinity || limit === 'unlimited') return 'bg-green-500'
+    const percentage = (used / (limit as number)) * 100
+    if (percentage >= 90) return 'bg-red-500'
+    if (percentage >= 70) return 'bg-yellow-500'
+    return 'bg-green-500'
+  }
+
+  const getProgressPercentage = (used: number, limit: number | string) => {
+    if (limit === Infinity || limit === 'unlimited') return 50 // Show half for unlimited
+    return Math.min((used / (limit as number)) * 100, 100)
+  }
+
+  return (
+    <div className="mystical-card mb-8">
+      <div className="flex items-center justify-between mb-6">
+        <h2 className="text-2xl font-bold">Usage Statistics</h2>
+        {usage.plan !== 'premium' && (
+          <Link
+            href="/pricing"
+            className="text-sm bg-yellow-500/20 text-yellow-400 px-4 py-2 rounded-lg hover:bg-yellow-500/30 transition-colors flex items-center gap-2"
+          >
+            <Crown className="h-4 w-4" />
+            Upgrade Plan
+          </Link>
+        )}
+      </div>
+
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+        {/* Resume Analyses */}
+        <div className="bg-black/30 rounded-lg p-4">
+          <div className="flex items-center gap-3 mb-3">
+            <FileText className="h-6 w-6 text-blue-400" />
+            <div>
+              <h3 className="font-semibold">Resume Analyses</h3>
+              <p className="text-sm text-gray-400">
+                {usage.resumeAnalyses.used} / {usage.resumeAnalyses.limit === Infinity ? '∞' : usage.resumeAnalyses.limit}
+              </p>
+            </div>
+          </div>
+          <div className="w-full bg-slate-700 rounded-full h-2 mb-2">
+            <div
+              className={`h-2 rounded-full transition-all ${getProgressColor(usage.resumeAnalyses.used, usage.resumeAnalyses.limit)}`}
+              style={{ width: `${getProgressPercentage(usage.resumeAnalyses.used, usage.resumeAnalyses.limit)}%` }}
+            />
+          </div>
+          {usage.resumeAnalyses.remaining !== 'unlimited' && usage.resumeAnalyses.remaining <= 2 && (
+            <p className="text-xs text-yellow-400 flex items-center gap-1 mt-2">
+              <AlertCircle className="h-3 w-3" />
+              {usage.resumeAnalyses.remaining} remaining
+            </p>
+          )}
+        </div>
+
+        {/* Predictions */}
+        <div className="bg-black/30 rounded-lg p-4">
+          <div className="flex items-center gap-3 mb-3">
+            <Brain className="h-6 w-6 text-purple-400" />
+            <div>
+              <h3 className="font-semibold">Tech Predictions</h3>
+              <p className="text-sm text-gray-400">
+                {usage.predictions.used} / {usage.predictions.limit === Infinity ? '∞' : usage.predictions.limit}
+              </p>
+            </div>
+          </div>
+          <div className="w-full bg-slate-700 rounded-full h-2 mb-2">
+            <div
+              className={`h-2 rounded-full transition-all ${getProgressColor(usage.predictions.used, usage.predictions.limit)}`}
+              style={{ width: `${getProgressPercentage(usage.predictions.used, usage.predictions.limit)}%` }}
+            />
+          </div>
+          {usage.predictions.remaining !== 'unlimited' && usage.predictions.remaining <= 2 && (
+            <p className="text-xs text-yellow-400 flex items-center gap-1 mt-2">
+              <AlertCircle className="h-3 w-3" />
+              {usage.predictions.remaining} remaining
+            </p>
+          )}
+        </div>
+
+        {/* Interview Questions */}
+        <div className="bg-black/30 rounded-lg p-4">
+          <div className="flex items-center gap-3 mb-3">
+            <MessageSquare className="h-6 w-6 text-green-400" />
+            <div>
+              <h3 className="font-semibold">Interview Questions</h3>
+              <p className="text-sm text-gray-400">
+                {usage.interviewQuestions.used} / {usage.interviewQuestions.limit === Infinity ? '∞' : usage.interviewQuestions.limit}
+              </p>
+            </div>
+          </div>
+          <div className="w-full bg-slate-700 rounded-full h-2 mb-2">
+            <div
+              className={`h-2 rounded-full transition-all ${getProgressColor(usage.interviewQuestions.used, usage.interviewQuestions.limit)}`}
+              style={{ width: `${getProgressPercentage(usage.interviewQuestions.used, usage.interviewQuestions.limit)}%` }}
+            />
+          </div>
+          {usage.interviewQuestions.remaining !== 'unlimited' && usage.interviewQuestions.remaining <= 5 && (
+            <p className="text-xs text-yellow-400 flex items-center gap-1 mt-2">
+              <AlertCircle className="h-3 w-3" />
+              {usage.interviewQuestions.remaining} remaining
+            </p>
+          )}
+        </div>
+      </div>
+    </div>
+  )
+}
 
 export default function DashboardPage() {
   // Zodiac wheel and planetary symbols for Kundali background
@@ -156,6 +291,11 @@ export default function DashboardPage() {
             <Sparkles className="h-8 w-8 text-purple-400 mx-auto mb-2" />
             <h3 className="font-semibold">Plan</h3>
             <p className="text-purple-300 capitalize">{user?.plan}</p>
+            {user?.plan !== 'premium' && (
+              <Link href="/pricing" className="text-xs text-yellow-400 hover:underline mt-1 block">
+                Upgrade
+              </Link>
+            )}
           </div>
           <div className="mystical-card text-center">
             <Star className="h-8 w-8 text-yellow-400 mx-auto mb-2" />
@@ -173,6 +313,9 @@ export default function DashboardPage() {
             <p className="text-blue-300">{user?.techGoal}</p>
           </div>
         </div>
+
+        {/* Usage Stats - NEW SECTION */}
+        <UsageStatsSection />
 
         {/* Quick Actions */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-8">

@@ -1,126 +1,313 @@
 'use client'
 
+import { useState, useEffect } from 'react'
 import Link from 'next/link'
-import { Check, Crown, Sparkles, Zap, Gift } from 'lucide-react'
+import { useRouter } from 'next/navigation'
+import { Check, Crown, Sparkles, Zap, X, Loader2 } from 'lucide-react'
+
+declare global {
+  interface Window {
+    Razorpay: any;
+  }
+}
 
 export default function PricingPage() {
-  // const freeFeatures = [
-  //   'Tech Zodiac Sign',
-  //   'Tech Fate Number',
-  //   'Tech Elements',
-  //   'Daily Skill Horoscope',
-  //   'Basic Career Summary',
-  //   '30-day Learning Roadmap',
-  //   'Salary Projection (1 year)',
-  //   'Market Predictions',
-  //   'Love Compatibility',
-  //   'Basic Company Matching'
-  // ]
+  const router = useRouter()
+  const [loading, setLoading] = useState<string | null>(null)
+  const [user, setUser] = useState<any>(null)
 
-  // const premiumFeatures = [
-  //   'Everything in Free',
-  //   'Full Tech Kundali Chart',
-  //   '3-year + 5-year Career Predictions',
-  //   '90 + 180-day Roadmaps',
-  //   'Resume Gap Analysis',
-  //   'Full Company Compatibility',
-  //   'Skill Chakra Alignment',
-  //   'Tech Mahadasha & Sade Saati',
-  //   'Battle Destiny (Compare users)',
-  //   'Monthly Horoscope',
-  //   'Premium Tools & Analytics',
-  //   'Priority Support'
-  // ]
+  useEffect(() => {
+    // Load Razorpay script
+    const script = document.createElement('script')
+    script.src = 'https://checkout.razorpay.com/v1/checkout.js'
+    script.async = true
+    document.body.appendChild(script)
+
+    // Check if user is logged in
+    const token = localStorage.getItem('tk_token')
+    if (token) {
+      fetch(`${process.env.NEXT_PUBLIC_API_BASE || 'http://localhost:8787'}/api/me`, {
+        headers: { Authorization: `Bearer ${token}` }
+      })
+        .then(res => res.json())
+        .then(data => setUser(data.user))
+        .catch(() => setUser(null))
+    }
+
+    return () => {
+      document.body.removeChild(script)
+    }
+  }, [])
+
+  const handlePayment = async (planType: 'basic' | 'premium') => {
+    const token = localStorage.getItem('tk_token')
+    if (!token) {
+      router.push('/login?redirect=/pricing')
+      return
+    }
+
+    setLoading(planType)
+
+    try {
+      // Create order
+      const orderRes = await fetch(`${process.env.NEXT_PUBLIC_API_BASE || 'http://localhost:8787'}/api/payments/create-order`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${token}`
+        },
+        body: JSON.stringify({ planType })
+      })
+
+      if (!orderRes.ok) {
+        throw new Error('Failed to create order')
+      }
+
+      const orderData = await orderRes.json()
+
+      // Configure Razorpay options
+      const options = {
+        key: 'rzp_test_RmiEgx4rUdrcQO', // Your test key
+        amount: orderData.amount,
+        currency: orderData.currency,
+        name: 'Tech Kundali',
+        description: `${planType === 'basic' ? 'Basic' : 'Premium'} Plan Subscription`,
+        order_id: orderData.orderId,
+        handler: async function (response: any) {
+          // Payment successful, verify on backend
+          try {
+            const verifyRes = await fetch(`${process.env.NEXT_PUBLIC_API_BASE || 'http://localhost:8787'}/api/payments/verify`, {
+              method: 'POST',
+              headers: {
+                'Content-Type': 'application/json',
+                Authorization: `Bearer ${token}`
+              },
+              body: JSON.stringify({
+                razorpay_order_id: response.razorpay_order_id,
+                razorpay_payment_id: response.razorpay_payment_id,
+                razorpay_signature: response.razorpay_signature
+              })
+            })
+
+            if (verifyRes.ok) {
+              router.push('/payment-success?plan=' + planType)
+            } else {
+              alert('Payment verification failed. Please contact support.')
+            }
+          } catch (error) {
+            console.error('Verification error:', error)
+            alert('Payment verification failed. Please contact support.')
+          } finally {
+            setLoading(null)
+          }
+        },
+        prefill: {
+          name: user?.fullName || '',
+          email: user?.email || ''
+        },
+        theme: {
+          color: '#9333ea'
+        },
+        modal: {
+          ondismiss: function () {
+            setLoading(null)
+          }
+        }
+      }
+
+      const razorpay = new window.Razorpay(options)
+      razorpay.open()
+    } catch (error) {
+      console.error('Payment error:', error)
+      alert('Failed to initiate payment. Please try again.')
+      setLoading(null)
+    }
+  }
+
+  const plans = [
+    {
+      id: 'free',
+      name: 'Free Starter',
+      price: 0,
+      icon: Sparkles,
+      color: 'purple',
+      features: [
+        '1 Resume Analysis',
+        '1 Tech Prediction',
+        '5 Interview Questions',
+        'Basic Career Insights',
+        'Tech Zodiac Sign',
+        'Limited Company Matching'
+      ],
+      limitations: [
+        'No resume gap analysis',
+        'Limited predictions',
+        'Basic features only'
+      ]
+    },
+    {
+      id: 'basic',
+      name: 'Basic Pro',
+      price: 69,
+      period: '', // One-time / Credit pack
+      icon: Zap,
+      color: 'blue',
+      popular: true,
+      features: [
+        '10 Resume Analyses',
+        '10 Tech Predictions',
+        '20 Interview Questions',
+        'Advanced Career Insights',
+        'Resume Gap Analysis',
+        'Learning Roadmap'
+      ],
+      limitations: []
+    },
+    {
+      id: 'premium',
+      name: 'Premium Unlimited',
+      price: 99,
+      period: '/month',
+      icon: Crown,
+      color: 'yellow',
+      features: [
+        'Unlimited Resume Analyses',
+        'Unlimited Tech Predictions',
+        'Unlimited Interview Questions',
+        'Full Tech Kundali',
+        'Company Compatibility',
+        'Battle Destiny Mode',
+        'Priority Support'
+      ],
+      limitations: []
+    }
+  ]
 
   return (
     <div className="min-h-screen py-12 px-4 bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900">
-      <div className="max-w-4xl mx-auto text-center">
+      <div className="max-w-7xl mx-auto">
         {/* Header */}
-        <div className="mb-16">
-          <Gift className="h-20 w-20 text-yellow-400 mx-auto mb-6 animate-bounce" />
-          <h1 className="text-4xl md:text-5xl font-bold mb-6 bg-gradient-to-r from-yellow-400 to-orange-400 bg-clip-text text-transparent">
-            Affordable Pricing for Career & Resume Tools
+        <div className="text-center mb-16">
+          <h1 className="text-5xl md:text-6xl font-bold mb-6 bg-gradient-to-r from-purple-400 via-pink-400 to-blue-400 bg-clip-text text-transparent">
+            Choose Your Plan
           </h1>
-          <h2 className="text-3xl md:text-4xl font-bold mb-4 text-yellow-400">
-            🎉 Everything is FREE! 🎉
-          </h2>
-          <p className="text-2xl text-gray-300 mb-8">
-            All premium features are completely free for a limited time!
+          <p className="text-xl text-gray-300 max-w-2xl mx-auto">
+            Unlock your tech destiny with AI-powered career insights and resume analysis
           </p>
-          <div className="bg-gradient-to-r from-green-600/20 to-emerald-600/20 border-2 border-green-500/50 rounded-xl p-8">
-            <h2 className="text-3xl font-bold text-green-400 mb-4">🚀 Launch Special Offer</h2>
-            <p className="text-xl text-gray-200 mb-6">
-              We're celebrating our launch by giving everyone access to ALL features absolutely FREE!
-            </p>
-            <div className="grid md:grid-cols-3 gap-6 text-center">
-              <div className="bg-black/30 rounded-lg p-4">
-                <div className="text-2xl font-bold text-yellow-400">✨ Full Tech Kundali</div>
-                <div className="text-gray-300">Complete analysis & predictions</div>
+        </div>
+
+        {/* Pricing Cards */}
+        <div className="grid md:grid-cols-3 gap-8 mb-12">
+          {plans.map((plan) => {
+            const Icon = plan.icon
+            const isCurrentPlan = user?.plan === plan.id
+
+            return (
+              <div
+                key={plan.id}
+                className={`relative rounded-2xl p-8 backdrop-blur-sm border-2 transition-all hover:scale-105 ${plan.popular
+                  ? 'bg-gradient-to-br from-blue-900/80 to-purple-900/80 border-blue-500 shadow-xl shadow-blue-500/20'
+                  : 'bg-gradient-to-br from-slate-800/80 to-slate-900/80 border-slate-700'
+                  }`}
+              >
+                {plan.popular && (
+                  <div className="absolute -top-4 left-1/2 transform -translate-x-1/2">
+                    <span className="bg-gradient-to-r from-blue-500 to-purple-500 text-white px-4 py-1 rounded-full text-sm font-bold">
+                      MOST POPULAR
+                    </span>
+                  </div>
+                )}
+
+                {isCurrentPlan && (
+                  <div className="absolute -top-4 right-4">
+                    <span className="bg-green-500 text-white px-3 py-1 rounded-full text-xs font-bold">
+                      CURRENT PLAN
+                    </span>
+                  </div>
+                )}
+
+                <div className="text-center mb-6">
+                  <Icon className={`h-12 w-12 text-${plan.color}-400 mx-auto mb-4`} />
+                  <h2 className="text-2xl font-bold text-white mb-2">{plan.name}</h2>
+                  <div className="flex items-baseline justify-center gap-2">
+                    <span className="text-5xl font-bold text-white">₹{plan.price}</span>
+                    {plan.price > 0 && <span className="text-gray-400">/year</span>}
+                  </div>
+                </div>
+
+                <ul className="space-y-3 mb-8">
+                  {plan.features.map((feature, i) => (
+                    <li key={i} className="flex items-start">
+                      <Check className="h-5 w-5 text-green-400 mr-3 flex-shrink-0 mt-0.5" />
+                      <span className="text-gray-300">{feature}</span>
+                    </li>
+                  ))}
+                  {plan.limitations.map((limitation, i) => (
+                    <li key={`lim-${i}`} className="flex items-start opacity-50">
+                      <X className="h-5 w-5 text-red-400 mr-3 flex-shrink-0 mt-0.5" />
+                      <span className="text-gray-400">{limitation}</span>
+                    </li>
+                  ))}
+                </ul>
+
+                {plan.id === 'free' ? (
+                  <Link
+                    href={user ? '/dashboard' : '/signup'}
+                    className="w-full block text-center bg-purple-600 hover:bg-purple-700 py-3 rounded-lg font-semibold transition-colors text-white"
+                  >
+                    {user ? 'Go to Dashboard' : 'Get Started Free'}
+                  </Link>
+                ) : (
+                  <button
+                    onClick={() => handlePayment(plan.id as 'basic' | 'premium')}
+                    disabled={loading !== null || isCurrentPlan}
+                    className={`w-full py-3 rounded-lg font-semibold transition-all flex items-center justify-center ${isCurrentPlan
+                      ? 'bg-gray-600 cursor-not-allowed text-gray-300'
+                      : plan.popular
+                        ? 'bg-gradient-to-r from-blue-500 to-purple-500 hover:from-blue-600 hover:to-purple-600 text-white shadow-lg'
+                        : 'bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 text-white'
+                      }`}
+                  >
+                    {loading === plan.id ? (
+                      <>
+                        <Loader2 className="animate-spin h-5 w-5 mr-2" />
+                        Processing...
+                      </>
+                    ) : isCurrentPlan ? (
+                      'Current Plan'
+                    ) : (
+                      `Upgrade to ${plan.name}`
+                    )}
+                  </button>
+                )}
               </div>
-              <div className="bg-black/30 rounded-lg p-4">
-                <div className="text-2xl font-bold text-blue-400">📊 Resume Analysis</div>
-                <div className="text-gray-300">AI-powered optimization</div>
-              </div>
-              <div className="bg-black/30 rounded-lg p-4">
-                <div className="text-2xl font-bold text-purple-400">🎯 Interview Prep</div>
-                <div className="text-gray-300">Complete preparation guide</div>
-              </div>
+            )
+          })}
+        </div>
+
+        {/* FAQ Section */}
+        <div className="bg-slate-800/50 backdrop-blur-sm rounded-2xl p-8 border border-slate-700">
+          <h3 className="text-2xl font-bold text-white mb-6 text-center">Frequently Asked Questions</h3>
+          <div className="grid md:grid-cols-2 gap-6">
+            <div>
+              <h4 className="font-bold text-purple-400 mb-2">What payment methods do you accept?</h4>
+              <p className="text-gray-300">We accept all major credit/debit cards, UPI, and net banking through Razorpay.</p>
+            </div>
+            <div>
+              <h4 className="font-bold text-purple-400 mb-2">Can I upgrade or downgrade anytime?</h4>
+              <p className="text-gray-300">Yes, you can upgrade your plan anytime. Downgrades take effect at the end of your billing cycle.</p>
+            </div>
+            <div>
+              <h4 className="font-bold text-purple-400 mb-2">Is my payment information secure?</h4>
+              <p className="text-gray-300">Absolutely! All payments are processed securely through Razorpay with industry-standard encryption.</p>
+            </div>
+            <div>
+              <h4 className="font-bold text-purple-400 mb-2">What happens when I reach my limit?</h4>
+              <p className="text-gray-300">You'll be notified and can upgrade your plan to continue using the service without interruption.</p>
             </div>
           </div>
-        </div>
-
-        {/* Call to Action */}
-        <div className="bg-gradient-to-r from-purple-800/80 to-blue-800/80 backdrop-blur-sm border-2 border-purple-500/50 rounded-xl p-12">
-          <h3 className="text-4xl font-bold mb-6 text-white">
-            Start Your Tech Journey Today!
-          </h3>
-          <p className="text-xl text-gray-300 mb-8">
-            No credit card required. No hidden fees. Just pure tech astrology magic! ✨
-          </p>
-          <Link
-            href="/signup"
-            className="inline-block bg-gradient-to-r from-yellow-500 to-orange-500 hover:from-yellow-600 hover:to-orange-600 text-black px-12 py-4 rounded-xl text-xl font-bold transition-all transform hover:scale-105 shadow-lg hover:shadow-yellow-500/20"
-          >
-            🎯 Get Started FREE Now!
-          </Link>
-        </div>
-
-        {/* Limited Time Notice */}
-        <div className="mt-12 bg-gradient-to-r from-red-600/20 to-pink-600/20 border-2 border-red-500/50 rounded-xl p-6">
-          <p className="text-lg text-red-300">
-            ⏰ <strong>Limited Time Offer:</strong> Enjoy all premium features for free during our launch period. 
-            Sign up now to secure your access!
-          </p>
         </div>
       </div>
-
-      {/* Commented out original pricing content */}
-      {/* 
-        <div className="grid md:grid-cols-2 gap-8 max-w-4xl mx-auto">
-          <div className="mystical-card border-purple-500/50">
-            <div className="text-center mb-6">
-              <Zap className="h-12 w-12 text-purple-400 mx-auto mb-4" />
-              <h2 className="text-2xl font-bold mb-2">Free Destiny</h2>
-              <div className="text-3xl font-bold mb-2">₹0</div>
-              <p className="text-gray-300">Forever free</p>
-            </div>
-            <ul className="space-y-3 mb-8">
-              {freeFeatures.map((feature, i) => (
-                <li key={i} className="flex items-center">
-                  <Check className="h-5 w-5 text-green-400 mr-3 flex-shrink-0" />
-                  <span className="text-gray-300">{feature}</span>
-                </li>
-              ))}
-            </ul>
-            <Link
-              href="/signup"
-              className="w-full block text-center bg-purple-600 hover:bg-purple-700 py-3 rounded-lg font-semibold transition-colors"
-            >
-              Get Started Free
-            </Link>
-          </div>
-        </div>
-      */}
     </div>
   )
 }
